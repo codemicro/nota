@@ -15,12 +15,14 @@ var (
 
 
 func InitDatabase() {
-	Conn, err := gorm.Open("sqlite3", "nota.db")
+	var err error  // so it writes to Conn on the global level
+	Conn, err = gorm.Open("sqlite3", "nota.db")
 	if err != nil {
 		panic("failed to connect database")
 	}
 	log.Println("Connected to database")
 
 	Conn.AutoMigrate(&models.Session{})
+	Conn.AutoMigrate(&models.File{})
 	log.Println("Migrated database")
 }

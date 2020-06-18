@@ -2,6 +2,7 @@ package main
 
 
 import (
+	"github.com/codemicro/nota/internal/database"
 	"github.com/gofiber/fiber"
 	"log"
 
@@ -23,6 +24,7 @@ func main() {
 		c.Next()
 	})
 
+	database.InitDatabase()
 	endpoints.InitEndpoints(app)
 
 	log.Panic(app.Listen(serveAtAddress))

@@ -1,6 +1,6 @@
 # Nota
 
-A lightweight note management app designed to organise photographs of notes
+A lightweight note management webapp designed to organise digital notes
 
 ### Todo
 

@@ -1,3 +1,3 @@
-module github.com/codemicro/tala
+module github.com/codemicro/nota
 
 go 1.14

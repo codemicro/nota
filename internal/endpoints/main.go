@@ -1,7 +1,9 @@
 package endpoints
 
-
-import "github.com/gofiber/fiber"
+import (
+	"github.com/gofiber/fiber"
+	"log"
+)
 
 
 func InitEndpoints(app *fiber.App) {
@@ -9,4 +11,7 @@ func InitEndpoints(app *fiber.App) {
 	app.Get("/", visualIndex)
 
 	// API endpoints
+	app.Post("/api/session/create", apiCreateSession)
+
+	log.Println("Setup endpoints")
 }

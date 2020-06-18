@@ -5,6 +5,7 @@ import (
 	"github.com/codemicro/nota/internal/database"
 	"github.com/gofiber/fiber"
 	"log"
+	"os"
 
 	"github.com/codemicro/nota/internal/endpoints"
 )
@@ -26,6 +27,9 @@ func main() {
 
 	database.InitDatabase()
 	endpoints.InitEndpoints(app)
+
+	// Make directories and ignore any errors (assuming they already exist)
+	_ = os.Mkdir("img/", os.ModeDir)
 
 	log.Panic(app.Listen(serveAtAddress))
 

@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"github.com/gofiber/fiber"
 	"log"
@@ -7,10 +8,12 @@ import (
 	"github.com/codemicro/nota/internal/endpoints"
 )
 
+
 var (
 	serveAtAddress = 8000
 	version = "0.0.0a"
 )
+
 
 func main() {
 	app := fiber.New()

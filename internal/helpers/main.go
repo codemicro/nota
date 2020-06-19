@@ -48,3 +48,16 @@ func SaveBytesToDisk(path string, content []byte) error {
 
 	return nil
 }
+
+func MimeTypeToFileExt(mimeType string) (string, error) {
+	mapping := map[string]string{
+		"image/jpeg": "jpg",
+		"image/png":  "png",
+	}[mimeType]
+
+	if mapping == "" {
+		return "", errors.New("MIME type not found")
+	}
+
+	return mapping, nil
+}

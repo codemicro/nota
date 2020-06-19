@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/fiber"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -179,7 +178,7 @@ func apiAddFile(c *fiber.Ctx) {
 		}
 	}
 
-	filePath = "img" + string(os.PathSeparator) + filePath
+	filePath = "img/" + filePath
 
 	err = helpers.SaveBytesToDisk(filePath, fileCont)
 

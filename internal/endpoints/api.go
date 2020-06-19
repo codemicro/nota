@@ -1,13 +1,14 @@
 package endpoints
 
 import (
+	"io/ioutil"
+	"net/http"
+	"strconv"
+
 	"github.com/codemicro/nota/internal/database"
 	"github.com/codemicro/nota/internal/helpers"
 	"github.com/codemicro/nota/internal/models"
 	"github.com/gofiber/fiber"
-	"io/ioutil"
-	"net/http"
-	"strconv"
 )
 
 var (
@@ -55,12 +56,39 @@ func apiGetSession(c *fiber.Ctx) {
 }
 
 func apiCreateSession(c *fiber.Ctx) {
-	// TODO: Parse values
+
+	subject := c.FormValue("subject")
+	title := c.FormValue("title")
+	time := c.FormValue("timestamp")
+
+	if subject == "" || title == "" {
+		c.Status(400).JSON(models.GenericResponse{
+			Status:  "error",
+			Message: "'subject' or 'title' field is missing/blank",
+		})
+		return
+	}
+
+	var submitTime int32
+	if time == "" {
+		submitTime = 0
+	} else {
+		st, err := strconv.ParseInt(time, 10, 32)
+		if err != nil {
+			c.Status(400).JSON(models.GenericResponse{
+				Status:  "error",
+				Message: "'timestamp' is not a number",
+			})
+			return
+		}
+		submitTime = int32(st)
+	}
+
 	conn := database.Conn
 	session := models.Session{
-		Time:    1592491944,
-		Subject: "Maths",
-		Title:   "Quadratic equations",
+		Time:    submitTime,
+		Subject: subject,
+		Title:   title,
 	}
 
 	conn.Create(&session)
@@ -69,36 +97,7 @@ func apiCreateSession(c *fiber.Ctx) {
 }
 
 // File functions
-func apiGetAllFiles(c *fiber.Ctx) {
-
-	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
-	if err != nil {
-		c.Status(400).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "ID is not a valid number",
-		})
-		return
-	}
-
-	conn := database.Conn
-
-	if conn.Find(&models.Session{}, id).RecordNotFound() {
-		c.Status(404).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "Session ID not found",
-		})
-		return
-	}
-
-	var files []models.File
-	conn.Where(&models.File{ParentSession: id}).Find(&files)
-
-	c.JSON(files)
-}
-
 func apiAddFile(c *fiber.Ctx) {
-	// TODO: Support file upload
-
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 
 	// Check the ID is a valid number
@@ -110,8 +109,7 @@ func apiAddFile(c *fiber.Ctx) {
 		return
 	}
 
-	// Check name exists
-
+	// Check name exists in request params
 	filename := c.FormValue("name")
 	if filename == "" {
 		c.Status(400).JSON(models.GenericResponse{
@@ -123,7 +121,7 @@ func apiAddFile(c *fiber.Ctx) {
 
 	conn := database.Conn
 
-	// check there's a session with the specified ID
+	// check there's a session with the specified ID in the db
 	var count int
 	conn.Model(&models.Session{}).Where("id = ?", int(id)).Count(&count)
 
@@ -145,7 +143,7 @@ func apiAddFile(c *fiber.Ctx) {
 		return
 	}
 
-	// Check file is an image
+	// Check file is an image and not some other type of file
 	fileHandler, _ := imageFile.Open()
 	fileCont, err := ioutil.ReadAll(fileHandler)
 
@@ -165,7 +163,7 @@ func apiAddFile(c *fiber.Ctx) {
 		var fileExt string
 		fileExt, err = helpers.GetFileExtension(filename)
 		if err != nil {
-			fileExt = "jpg"
+			fileExt, _ = helpers.MimeTypeToFileExt(mimeType)
 		}
 		randomFilename, _ := helpers.RandomHex(20)
 		filePath = randomFilename + "." + fileExt

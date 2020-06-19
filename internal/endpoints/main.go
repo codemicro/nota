@@ -13,7 +13,6 @@ func InitEndpoints(app *fiber.App) {
 	app.Post("/api/session/create/", apiCreateSession)
 	app.Get("/api/session/", apiGetAllSessions)
 	app.Get("/api/session/:id/", apiGetSession)
-	app.Get("/api/session/:id/files/", apiGetAllFiles)
 	app.Post("/api/session/:id/files/add/", apiAddFile)
 
 	log.Println("Endpoints all setup")

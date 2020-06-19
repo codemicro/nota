@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"github.com/codemicro/nota/internal/database"
 	"github.com/gofiber/fiber"
@@ -10,18 +9,16 @@ import (
 	"github.com/codemicro/nota/internal/endpoints"
 )
 
-
 var (
 	serveAtAddress = 8000
-	version = "0.0.0a"
+	version        = "0.0.0a"
 )
-
 
 func main() {
 	app := fiber.New()
 
 	app.Use(func(c *fiber.Ctx) {
-		c.Append("X-Powered-By", "Nota v" + version)
+		c.Append("X-Powered-By", "Nota v"+version)
 		c.Next()
 	})
 

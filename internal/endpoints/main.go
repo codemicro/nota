@@ -5,7 +5,6 @@ import (
 	"log"
 )
 
-
 func InitEndpoints(app *fiber.App) {
 	// Visual endpoints
 	app.Get("/", visualIndex)

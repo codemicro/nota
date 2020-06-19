@@ -113,7 +113,7 @@ func apiAddFile(c *fiber.Ctx) {
 	// Check name exists
 
 	filename := c.FormValue("name")
-	if filename == ""{
+	if filename == "" {
 		c.Status(400).JSON(models.GenericResponse{
 			Status:  "error",
 			Message: "'name' is not present, or is blank",
@@ -191,8 +191,8 @@ func apiAddFile(c *fiber.Ctx) {
 	}
 
 	responseObject := models.File{
-		Name:  filename,
-		Path:  filePath,
+		Name:          filename,
+		Path:          filePath,
 		ParentSession: id,
 	}
 

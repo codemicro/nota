@@ -1,6 +1,5 @@
 package database
 
-
 import (
 	"github.com/codemicro/nota/internal/models"
 	"github.com/jinzhu/gorm"
@@ -8,14 +7,12 @@ import (
 	"log"
 )
 
-
 var (
 	Conn *gorm.DB
 )
 
-
 func InitDatabase() {
-	var err error  // so it writes to Conn on the global level
+	var err error // so it writes to Conn on the global level
 	Conn, err = gorm.Open("sqlite3", "nota.db")
 	if err != nil {
 		panic("failed to connect database")

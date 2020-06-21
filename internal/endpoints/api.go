@@ -181,10 +181,7 @@ func apiAddFile(c *fiber.Ctx) {
 	err = helpers.SaveBytesToDisk(filePath, fileCont)
 
 	if err != nil {
-		c.Status(500).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "Internal server error - check back later",
-		})
+		c.Next(err) // This error is now Fiber's problem (pass to predefined error handler)
 		return
 	}
 

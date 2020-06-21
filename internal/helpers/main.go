@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"github.com/disintegration/imaging"
 	"os"
 	"strings"
 )
@@ -60,4 +61,17 @@ func MimeTypeToFileExt(mimeType string) (string, error) {
 	}
 
 	return mapping, nil
+}
+
+func RotateImage(imgPath string) error {
+	img, err := imaging.Open(imgPath)
+	if err != nil {
+		return err
+	}
+	img = imaging.Rotate90(img)
+	err = imaging.Save(img, imgPath)
+	if err != nil {
+		return err
+	}
+	return nil
 }

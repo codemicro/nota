@@ -98,14 +98,10 @@ func apiCreateSession(c *fiber.Ctx) {
 
 // File functions
 func apiAddFile(c *fiber.Ctx) {
-	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	id, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "session", &models.Session{})
 
-	// Check the ID is a valid number
-	if err != nil {
-		c.Status(400).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "ID is not a valid number",
-		})
+	if hasFailed {
+		c.Status(httpCode).JSON(formedResponseModel)
 		return
 	}
 
@@ -115,20 +111,6 @@ func apiAddFile(c *fiber.Ctx) {
 		c.Status(400).JSON(models.GenericResponse{
 			Status:  "error",
 			Message: "'name' is not present, or is blank",
-		})
-		return
-	}
-
-	conn := database.Conn
-
-	// check there's a session with the specified ID in the db
-	var count int
-	conn.Model(&models.Session{}).Where("id = ?", int(id)).Count(&count)
-
-	if count == 0 {
-		c.Status(404).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "Session ID not found",
 		})
 		return
 	}
@@ -156,6 +138,8 @@ func apiAddFile(c *fiber.Ctx) {
 		})
 		return
 	}
+
+	conn := database.Conn
 
 	// Determine image path
 	var filePath string
@@ -196,4 +180,30 @@ func apiAddFile(c *fiber.Ctx) {
 	conn.Create(&responseObject)
 
 	c.JSON(responseObject)
+}
+
+func apiRotateImage(c *fiber.Ctx) {
+	fileId, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "file", &models.File{})
+
+	if hasFailed {
+		c.Status(httpCode).JSON(formedResponseModel)
+		return
+	}
+
+	conn := database.Conn
+
+	var file models.File
+	conn.Find(&file, fileId)
+
+	err := helpers.RotateImage(file.Path)
+	if err != nil {
+		c.Next(err)
+		return
+	}
+
+	c.JSON(models.GenericResponse{
+		Status:  "ok",
+		Message: "Success",
+	})
+
 }

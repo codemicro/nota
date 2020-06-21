@@ -14,6 +14,8 @@ func InitEndpoints(app *fiber.App) {
 	app.Get("/api/session/", apiGetAllSessions)
 	app.Get("/api/session/:id/", apiGetSession)
 	app.Post("/api/session/:id/files/add/", apiAddFile)
+	app.Get("/api/files/:id/rotate/", apiRotateImage)
 
+	// Files
 	log.Println("Endpoints all setup")
 }

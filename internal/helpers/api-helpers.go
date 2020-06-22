@@ -3,6 +3,7 @@ package helpers
 import (
 	"github.com/codemicro/nota/internal/database"
 	"github.com/codemicro/nota/internal/models"
+	"github.com/gofiber/fiber"
 	"os"
 	"strconv"
 )
@@ -52,4 +53,19 @@ func DeleteFile(file models.File) error {
 		return err
 	}
 	return nil
+}
+
+// Premade HTTP responses
+func NotFoundResponse(c *fiber.Ctx, message string) {
+	c.Status(404).JSON(models.GenericResponse{
+		Status:  "error",
+		Message: message,
+	})
+}
+
+func BadRequestResponse(c *fiber.Ctx, message string) {
+	c.Status(400).JSON(models.GenericResponse{
+		Status:  "error",
+		Message: message,
+	})
 }

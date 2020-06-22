@@ -29,20 +29,14 @@ func apiGetSession(c *fiber.Ctx) {
 
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
-		c.Status(400).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "ID is not a valid number",
-		})
+		helpers.BadRequestResponse(c, "ID is not a valid number")
 		return
 	}
 
 	var session models.Session
 
 	if conn.Find(&session, id).RecordNotFound() {
-		c.Status(404).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "Session ID not found",
-		})
+		helpers.NotFoundResponse(c, "Session ID not found")
 		return
 	}
 
@@ -62,10 +56,7 @@ func apiCreateSession(c *fiber.Ctx) {
 	time := c.FormValue("timestamp")
 
 	if subject == "" || title == "" {
-		c.Status(400).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "'subject' or 'title' field is missing/blank",
-		})
+		helpers.BadRequestResponse(c, "'subject' or 'title' field is missing/blank")
 		return
 	}
 
@@ -75,10 +66,7 @@ func apiCreateSession(c *fiber.Ctx) {
 	} else {
 		st, err := strconv.ParseInt(time, 10, 32)
 		if err != nil {
-			c.Status(400).JSON(models.GenericResponse{
-				Status:  "error",
-				Message: "'timestamp' is not a number",
-			})
+			helpers.BadRequestResponse(c, "'timestamp' is not a number")
 			return
 		}
 		submitTime = int32(st)
@@ -153,20 +141,14 @@ func apiAddFile(c *fiber.Ctx) {
 	// Check name exists in request params
 	filename := c.FormValue("name")
 	if filename == "" {
-		c.Status(400).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "'name' is not present, or is blank",
-		})
+		helpers.BadRequestResponse(c, "'name' is not present, or is blank")
 		return
 	}
 
 	// Get multipart image
 	imageFile, err := c.FormFile("image")
 	if err != nil {
-		c.Status(400).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "No 'image' included",
-		})
+		helpers.BadRequestResponse(c, "No 'image' included")
 		return
 	}
 
@@ -177,16 +159,13 @@ func apiAddFile(c *fiber.Ctx) {
 	mimeType := http.DetectContentType(fileCont)
 
 	if !helpers.IsStringInSlice(mimeType, allowableMimeTypes) {
-		c.Status(400).JSON(models.GenericResponse{
-			Status:  "error",
-			Message: "Bad image format",
-		})
+		helpers.BadRequestResponse(c, "Bad image format")
 		return
 	}
 
 	conn := database.Conn
 
-	// Determine image path
+	// Determine image path using random hex data
 	var filePath string
 	for {
 		var fileExt string
@@ -208,7 +187,6 @@ func apiAddFile(c *fiber.Ctx) {
 	filePath = "img/" + filePath
 
 	err = helpers.SaveBytesToDisk(filePath, fileCont)
-
 	if err != nil {
 		c.Next(err) // This error is now Fiber's problem (pass to predefined error handler)
 		return
@@ -220,9 +198,7 @@ func apiAddFile(c *fiber.Ctx) {
 		ParentSession: id,
 	}
 
-	// Insert
-
-	conn.Create(&responseObject)
+	conn.Create(&responseObject)  // Insert to database
 
 	c.JSON(responseObject)
 }

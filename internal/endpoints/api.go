@@ -106,6 +106,21 @@ func apiGetAllFiles(c *fiber.Ctx) {
 	c.JSON(files)
 }
 
+func apiGetFile(c *fiber.Ctx) {
+	id, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "file", &models.File{})
+
+	if hasFailed {
+		c.Status(httpCode).JSON(formedResponseModel)
+		return
+	}
+
+	conn := database.Conn
+	var file models.File
+	conn.Find(&file, id)
+
+	c.JSON(file)
+}
+
 func apiAddFile(c *fiber.Ctx) {
 	id, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "session", &models.Session{})
 

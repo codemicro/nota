@@ -276,3 +276,26 @@ func apiDeleteImage(c *fiber.Ctx) {
 		Message: "File deleted successfully",
 	})
 }
+
+func apiRemoveOrphanedFiles(c *fiber.Ctx) {
+	conn := database.Conn
+	var files []models.File
+	countDeleted := 0
+	conn.Find(&files)
+
+	for _, file := range files {
+		if conn.Find(&models.Session{}, file.ParentSession).RecordNotFound() {
+			err := helpers.DeleteFile(file)
+			if err != nil {
+				c.Next(err)
+				return
+			}
+			countDeleted++
+		}
+	}
+
+	c.JSON(models.GenericResponse{
+		Status:  "success",
+		Message: strconv.Itoa(countDeleted) + " orphaned file(s) deleted",
+	})
+}

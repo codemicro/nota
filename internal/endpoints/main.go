@@ -17,6 +17,7 @@ func InitEndpoints(app *fiber.App) {
 	app.Post("/api/sessions/:id/files/add/", apiAddFile)
 
 	app.Get("/api/files/", apiGetAllFiles)
+	app.Delete("/api/files/deleteOrphaned", apiRemoveOrphanedFiles)
 	app.Get("/api/files/:id/", apiGetFile)
 	app.Delete("/api/files/:id/", apiDeleteImage)
 	app.Get("/api/files/:id/rotate/", apiRotateImage)

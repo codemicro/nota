@@ -1,4 +1,4 @@
-Name: Codecov CI
+name: Codecov CI
 
 on: [push]
 

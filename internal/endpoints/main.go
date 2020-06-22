@@ -10,11 +10,11 @@ func InitEndpoints(app *fiber.App) {
 	app.Get("/", visualIndex)
 
 	// API endpoints
-	app.Post("/api/session/create/", apiCreateSession)
-	app.Get("/api/session/", apiGetAllSessions)
-	app.Get("/api/session/:id/", apiGetSession)
-	app.Delete("/api/session/:id/", apiDeleteSession)
-	app.Post("/api/session/:id/files/add/", apiAddFile)
+	app.Post("/api/sessions/create/", apiCreateSession)
+	app.Get("/api/sessions/", apiGetAllSessions)
+	app.Get("/api/sessions/:id/", apiGetSession)
+	app.Delete("/api/sessions/:id/", apiDeleteSession)
+	app.Post("/api/sessions/:id/files/add/", apiAddFile)
 
 	app.Get("/api/files/", apiGetAllFiles)
 	app.Get("/api/files/:id/", apiGetFile)

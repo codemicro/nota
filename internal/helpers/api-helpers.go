@@ -29,10 +29,7 @@ func CheckAndConvertId(numberString string, idName string, modelType interface{}
 	conn := database.Conn
 
 	// check there's a session with the specified ID in the db
-	var count int
-	conn.Model(modelType).Where("id = ?", int(id)).Count(&count)
-
-	if count == 0 {
+	if conn.Find(modelType, id).RecordNotFound() {
 		return 0, true, 404, models.GenericResponse{
 			Status:  "error",
 			Message: idName + " ID not found",

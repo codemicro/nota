@@ -3,6 +3,7 @@ package helpers
 import (
 	"github.com/codemicro/nota/internal/database"
 	"github.com/codemicro/nota/internal/models"
+	"os"
 	"strconv"
 )
 
@@ -37,4 +38,18 @@ func CheckAndConvertId(numberString string, idName string, modelType interface{}
 	}
 
 	return id, false, 0, models.GenericResponse{}
+}
+
+func DeleteFile(file models.File) error {
+
+	// Deletes file based off object
+
+	conn := database.Conn
+	conn.Unscoped().Delete(&file) // Unscoped - actually remove instead of setting the deletedAt field
+	// delete assoc file
+	err := os.Remove(file.Path)
+	if err != nil {
+		return err
+	}
+	return nil
 }

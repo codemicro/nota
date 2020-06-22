@@ -3,7 +3,6 @@ package endpoints
 import (
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/codemicro/nota/internal/database"
@@ -264,12 +263,9 @@ func apiDeleteImage(c *fiber.Ctx) {
 	conn := database.Conn
 
 	var file models.File
-	conn.Find(&file, fileId)
+	conn.Find(&file, fileId) // Populate a file model based on ID
 
-	conn.Unscoped().Delete(&file) // Unscoped - actually remove instead of setting deletedAt field
-
-	// delete assoc file
-	err := os.Remove(file.Path)
+	err := helpers.DeleteFile(file)
 	if err != nil {
 		c.Next(err)
 		return

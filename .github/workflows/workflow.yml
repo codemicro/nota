@@ -1,1 +1,14 @@
+Name: Codecov CI
 
+on: [push]
+
+jobs:
+  codecov:
+    runs-on: ubuntu-latest
+    name: Codecov
+    steps:
+    - uses: actions/checkout@master
+    - uses: codecov/codecov-action@v1
+      with:
+        name: Nota code quality # optional
+        fail_ci_if_error: true # optional (default = false)

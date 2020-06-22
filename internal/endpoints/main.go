@@ -21,5 +21,7 @@ func InitEndpoints(app *fiber.App) {
 	app.Get("/api/files/:id/rotate/", apiRotateImage)
 
 	// Files
+	app.Static("/img", "img")
+
 	log.Println("Endpoints all setup")
 }

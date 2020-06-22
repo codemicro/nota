@@ -97,6 +97,28 @@ func apiCreateSession(c *fiber.Ctx) {
 	c.JSON(session)
 }
 
+func apiDeleteSession(c *fiber.Ctx) {
+	id, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "session", &models.Session{})
+
+	if hasFailed {
+		c.Status(httpCode).JSON(formedResponseModel)
+		return
+	}
+
+	conn := database.Conn
+
+	var session models.Session
+	conn.Find(&session, id)
+
+	conn.Unscoped().Delete(&session)
+
+	c.JSON(models.GenericResponse{
+		Status:  "ok",
+		Message: "Session deleted successfully",
+	})
+
+}
+
 // File functions
 func apiGetAllFiles(c *fiber.Ctx) {
 	conn := database.Conn

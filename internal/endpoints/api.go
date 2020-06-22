@@ -281,7 +281,6 @@ func apiRemoveOrphanedFiles(c *fiber.Ctx) {
 	conn := database.Conn
 	var files []models.File
 	countDeleted := 0
-	
 	conn.Find(&files)
 
 	for _, file := range files {

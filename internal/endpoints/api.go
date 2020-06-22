@@ -3,6 +3,7 @@ package endpoints
 import (
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/codemicro/nota/internal/database"
@@ -97,6 +98,14 @@ func apiCreateSession(c *fiber.Ctx) {
 }
 
 // File functions
+func apiGetAllFiles(c *fiber.Ctx) {
+	conn := database.Conn
+	var files []models.File
+	conn.Find(&files)
+
+	c.JSON(files)
+}
+
 func apiAddFile(c *fiber.Ctx) {
 	id, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "session", &models.Session{})
 

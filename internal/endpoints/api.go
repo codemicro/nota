@@ -168,8 +168,7 @@ func apiAddFile(c *fiber.Ctx) {
 	// Determine image path using random hex data
 	var filePath string
 	for {
-		var fileExt string
-		fileExt, err = helpers.GetFileExtension(filename)
+		fileExt, err := helpers.GetFileExtension(filename)
 		if err != nil {
 			fileExt, _ = helpers.MimeTypeToFileExt(mimeType)
 		}

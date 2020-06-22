@@ -1,14 +1,12 @@
-name: Codecov CI
-
+name: Example workflow for Codecov
 on: [push]
-
 jobs:
-  codecov:
+  run:
     runs-on: ubuntu-latest
-    name: Codecov
     steps:
     - uses: actions/checkout@master
     - uses: codecov/codecov-action@v1
+    - name: Upload coverage to Codecov  
+      uses: ./
       with:
-        name: Nota code quality # optional
-        fail_ci_if_error: true # optional (default = false)
+        name: Nota code quality

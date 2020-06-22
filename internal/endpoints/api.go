@@ -207,3 +207,30 @@ func apiRotateImage(c *fiber.Ctx) {
 	})
 
 }
+
+func apiDeleteImage(c *fiber.Ctx) {
+	fileId, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "file", &models.File{})
+	if hasFailed {
+		c.Status(httpCode).JSON(formedResponseModel)
+		return
+	}
+
+	conn := database.Conn
+
+	var file models.File
+	conn.Find(&file, fileId)
+
+	conn.Unscoped().Delete(&file) // Unscoped - actually remove instead of setting deletedAt field
+
+	// delete assoc file
+	err := os.Remove(file.Path)
+	if err != nil {
+		c.Next(err)
+		return
+	}
+
+	c.JSON(models.GenericResponse{
+		Status:  "ok",
+		Message: "File deleted successfully",
+	})
+}

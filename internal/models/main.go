@@ -17,6 +17,12 @@ type File struct {
 	ParentSession int64  `json:"parentSession"`
 }
 
+type User struct {
+	gorm.Model
+	Username string `json:"username" gorm:"unique;"`
+	Password string `json:"-"`
+}
+
 // Response models
 type GenericResponse struct {
 	Status  string `json:"status"`

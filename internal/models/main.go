@@ -5,9 +5,9 @@ import "github.com/jinzhu/gorm"
 // Database models
 type Session struct {
 	gorm.Model
-	Time    int32  `json:"time"`
-	Subject string `json:"subject"`
-	Title   string `json:"title"`
+	Time    int64  `json:"time" form:"time"`
+	Subject string `json:"subject" form:"subject"`
+	Title   string `json:"title" form:"title"`
 }
 
 type File struct {

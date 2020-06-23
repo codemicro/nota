@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/codemicro/nota/internal/authentication"
 	"github.com/codemicro/nota/internal/database"
 	"github.com/codemicro/nota/internal/endpoints"
 	"github.com/codemicro/nota/internal/logging"
@@ -44,6 +46,11 @@ func main() {
 
 	// Setup database and register endpoints
 	database.InitDatabase()
+	err := authentication.LoadKeys()
+	if err != nil {
+		fmt.Println("Error when loading RSA keys. Check the error logs for more detail.")
+		logging.ErrorLogger.Fatalln(err)
+	}
 	endpoints.InitEndpoints(app)
 
 	// 404 handler has to go down here otherwise it overrides everything

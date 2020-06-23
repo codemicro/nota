@@ -9,4 +9,5 @@ require (
 	github.com/gofiber/jwt v0.1.0
 	github.com/jinzhu/gorm v1.9.13
 	github.com/klauspost/compress v1.10.10 // indirect
+	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 )

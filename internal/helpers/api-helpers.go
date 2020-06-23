@@ -69,3 +69,10 @@ func BadRequestResponse(c *fiber.Ctx, message string) {
 		Message: message,
 	})
 }
+
+func UnauthorisedResponse(c *fiber.Ctx, message string) {
+	c.Status(401).JSON(models.GenericResponse{
+		Status:  "error",
+		Message: message,
+	})
+}

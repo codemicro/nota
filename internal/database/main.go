@@ -21,5 +21,6 @@ func InitDatabase() {
 
 	Conn.AutoMigrate(&models.Session{})
 	Conn.AutoMigrate(&models.File{})
+	Conn.AutoMigrate(&models.User{})
 	log.Println("Migrated database")
 }

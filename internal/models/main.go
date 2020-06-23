@@ -19,8 +19,9 @@ type File struct {
 
 type User struct {
 	gorm.Model
-	Username string `json:"username" gorm:"unique;"`
-	Password string `json:"-"`
+	Username     string `json:"username" gorm:"unique;"`
+	PasswordHash []byte `json:"-"`
+	Salt         string `json:"-"`
 }
 
 // Response models

@@ -34,9 +34,5 @@ func LoadSettings() error {
 
 	// Cast to struct
 	err = mapstructure.Decode(unmarshalled, &Settings)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

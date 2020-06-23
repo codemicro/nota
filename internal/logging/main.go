@@ -19,7 +19,7 @@ func InitLogging() {
 	AccessLogFile, _ = os.OpenFile("logs/access.log", os.O_APPEND|os.O_CREATE, 0644)
 	errorLogFile, _ = os.OpenFile("logs/error.log", os.O_APPEND|os.O_CREATE, 0644)
 
-	ErrorLogger = log.New(errorLogFile, "error", log.LstdFlags) // Register ErrorLogger
+	ErrorLogger = log.New(errorLogFile, "error ", log.LstdFlags) // Register ErrorLogger
 }
 
 func ErrorHandler(ctx *fiber.Ctx, err error) {

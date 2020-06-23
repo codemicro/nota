@@ -75,3 +75,10 @@ func RotateImage(imgPath string) error {
 	}
 	return nil
 }
+
+func SelectiveUpdate(old string, new string) string {
+	if new == "" {
+		return old
+	}
+	return new
+}

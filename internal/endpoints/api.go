@@ -51,6 +51,7 @@ func apiGetSession(c *fiber.Ctx) {
 
 func apiCreateSession(c *fiber.Ctx) {
 
+	// Not using c.BodyParser because this needs everything required
 	subject := c.FormValue("subject")
 	title := c.FormValue("title")
 	time := c.FormValue("timestamp")
@@ -60,16 +61,16 @@ func apiCreateSession(c *fiber.Ctx) {
 		return
 	}
 
-	var submitTime int32
+	var submitTime int64
 	if time == "" {
 		submitTime = 0
 	} else {
-		st, err := strconv.ParseInt(time, 10, 32)
+		var err error
+		submitTime, err = strconv.ParseInt(time, 10, 64)
 		if err != nil {
 			helpers.BadRequestResponse(c, "'timestamp' is not a number")
 			return
 		}
-		submitTime = int32(st)
 	}
 
 	conn := database.Conn
@@ -104,6 +105,48 @@ func apiDeleteSession(c *fiber.Ctx) {
 		Message: "Session deleted successfully",
 	})
 
+}
+
+func apiUpdateSession(c *fiber.Ctx) {
+	id, hasFailed, httpCode, formedResponseModel := helpers.CheckAndConvertId(c.Params("id"), "session", &models.Session{})
+
+	if hasFailed {
+		c.Status(httpCode).JSON(formedResponseModel)
+		return
+	}
+
+	conn := database.Conn
+
+	var session models.Session
+	conn.Find(&session, id)
+
+	var parseTime int64
+	if c.FormValue("time") != "" {
+		var err error
+		parseTime, err = strconv.ParseInt(helpers.SelectiveUpdate(session.Title, c.FormValue("time")), 10, 64)
+		if err != nil {
+			helpers.BadRequestResponse(c, "time must be a valid number")
+			return
+		}
+		session.Time = parseTime
+	}
+
+	session.Title = helpers.SelectiveUpdate(session.Title, c.FormValue("title"))
+	session.Subject = helpers.SelectiveUpdate(session.Subject, c.FormValue("subject"))
+
+	conn.Save(&session)
+	resp := struct {
+		models.GenericResponse
+		Values models.Session `json:"session"`
+	}{
+		GenericResponse: models.GenericResponse{
+			Status:  "ok",
+			Message: "updated successfully",
+		},
+		Values: session,
+	}
+
+	c.JSON(resp)
 }
 
 // File functions
@@ -197,7 +240,7 @@ func apiAddFile(c *fiber.Ctx) {
 		ParentSession: id,
 	}
 
-	conn.Create(&responseObject)  // Insert to database
+	conn.Create(&responseObject) // Insert to database
 
 	c.JSON(responseObject)
 }

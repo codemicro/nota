@@ -288,23 +288,28 @@ func apiAddFile(c *fiber.Ctx) {
 		return
 	}
 
+	var failures []string
+
 	// Check name exists in request params
 	filename := c.FormValue("name")
 	if filename == "" {
-		helpers.BadRequestResponse(c, "'name' is not present, or is blank")
-		return
+		failures = append(failures, "'name' is not present, or is blank")
 	}
 
 	// Get multipart image
 	imageFile, err := c.FormFile("image")
 	if err != nil {
-		helpers.BadRequestResponse(c, "No 'image' included")
+		failures = append(failures, "No 'image' included")
+	}
+
+	if len(failures) != 0 {
+		helpers.BadRequestResponse(c, strings.Join(failures[:], ","))
 		return
 	}
 
 	// Check file is an image and not some other type of file
 	fileHandler, _ := imageFile.Open()
-	fileCont, err := ioutil.ReadAll(fileHandler)
+	fileCont, _ := ioutil.ReadAll(fileHandler)
 
 	mimeType := http.DetectContentType(fileCont)
 
@@ -337,15 +342,11 @@ func apiAddFile(c *fiber.Ctx) {
 
 	err = helpers.SaveBytesToDisk(filePath, fileCont)
 	if err != nil {
-		c.Next(err) // This error is now Fiber's problem (pass to predefined error handler)
+		c.Next(err)
 		return
 	}
 
-	responseObject := models.File{
-		Name:          filename,
-		Path:          filePath,
-		ParentSession: id,
-	}
+	responseObject := models.File{Name: filename, Path: filePath, ParentSession: id}
 
 	conn.Create(&responseObject) // Insert to database
 

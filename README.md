@@ -6,6 +6,7 @@ A lightweight note management webapp designed to organise digital notes
 
 ### Todo
 
+* Paths should be configurable in settings JSON
 * JWT authentication
 * Static file serving
 * Frontend

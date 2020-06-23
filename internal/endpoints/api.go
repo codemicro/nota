@@ -346,11 +346,7 @@ func apiAddFile(c *fiber.Ctx) {
 		return
 	}
 
-	responseObject := models.File{
-		Name:          filename,
-		Path:          filePath,
-		ParentSession: id,
-	}
+	responseObject := models.File{Name: filename, Path: filePath, ParentSession: id}
 
 	conn.Create(&responseObject) // Insert to database
 

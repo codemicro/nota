@@ -6,6 +6,6 @@ A lightweight note management webapp designed to organise digital notes
 
 ### Todo
 
-* Session update
+* JWT authentication
 * Static file serving
 * Frontend

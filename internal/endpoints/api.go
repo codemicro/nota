@@ -1,9 +1,12 @@
 package endpoints
 
 import (
+	"github.com/codemicro/nota/internal/authentication"
+	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/codemicro/nota/internal/database"
 	"github.com/codemicro/nota/internal/helpers"
@@ -14,6 +17,30 @@ import (
 var (
 	allowableMimeTypes = []string{"image/jpeg", "image/png"}
 )
+
+// Login/register functions
+func apiLogIn(c *fiber.Ctx) {
+
+	// TODO: User verification and claim update
+
+	token := jwt.New(jwt.SigningMethodRS256)
+
+	// Set claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["name"] = "John Doe"
+	claims["admin"] = true
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString(authentication.PrivKey)
+	if err != nil {
+		c.Next(err)
+		return
+	}
+
+	c.JSON(fiber.Map{"token": t})
+
+}
 
 // Session functions
 func apiGetAllSessions(c *fiber.Ctx) {

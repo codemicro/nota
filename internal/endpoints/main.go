@@ -1,7 +1,10 @@
 package endpoints
 
 import (
+	"github.com/codemicro/nota/internal/authentication"
+	"github.com/codemicro/nota/internal/helpers"
 	"github.com/gofiber/fiber"
+	jwtware "github.com/gofiber/jwt"
 	"log"
 )
 
@@ -9,7 +12,24 @@ func InitEndpoints(app *fiber.App) {
 	// Visual endpoints
 	app.Get("/", visualIndex)
 
-	// API endpoints
+	// Files
+	app.Static("/img", "img")
+
+	// API endpoints that do not require authentication
+	app.Post("/api/login/", apiLogIn)
+
+	// Add JWT authentication
+	app.Use(jwtware.New(jwtware.Config{
+		SigningKey: authentication.PubKey,
+		ErrorHandler: func(c *fiber.Ctx, _ error) {
+			helpers.UnauthorisedResponse(c, "Invalid or expired token")
+		},
+		SigningMethod: "RS256",
+		ContextKey:    "jwt",
+		TokenLookup:   "cookie:token",
+	}))
+
+	// All other API endpoints
 	app.Post("/api/sessions/create/", apiCreateSession)
 	app.Get("/api/sessions/", apiGetAllSessions)
 	app.Get("/api/sessions/:id/", apiGetSession)
@@ -22,9 +42,6 @@ func InitEndpoints(app *fiber.App) {
 	app.Get("/api/files/:id/", apiGetFile)
 	app.Delete("/api/files/:id/", apiDeleteImage)
 	app.Get("/api/files/:id/rotate/", apiRotateImage)
-
-	// Files
-	app.Static("/img", "img")
 
 	log.Println("Endpoints all setup")
 }

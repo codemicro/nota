@@ -17,6 +17,7 @@ func InitEndpoints(app *fiber.App) {
 
 	// API endpoints that do not require authentication
 	app.Post("/api/login/", apiLogIn)
+	app.Post("/api/register/", apiRegister)
 
 	// Add JWT authentication
 	app.Use(jwtware.New(jwtware.Config{

@@ -1,6 +1,10 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+	"reflect"
+	"strings"
+)
 
 // Database models
 type Session struct {
@@ -33,4 +37,33 @@ type GenericResponse struct {
 type SessionWithFiles struct {
 	Session
 	Files []File `json:"files"`
+}
+
+// Misc. models
+type Settings struct {
+	AllowRegistration bool `json:"allowRegistration"`
+}
+
+func (b Settings) GetFields() []string {
+	var resp []string
+	val := reflect.ValueOf(b)
+	for i := 0; i < val.Type().NumField(); i++ {
+		t := val.Type().Field(i)
+
+		switch jsonTag := t.Tag.Get("json"); jsonTag {
+		case "":
+			resp = append(resp, t.Name)
+		case "-":
+		default:
+			var fieldName string
+			if commaIdx := strings.Index(jsonTag, ","); commaIdx > 0 {
+				fieldName = jsonTag[:commaIdx]
+			} else {
+				fieldName = jsonTag
+			}
+			resp = append(resp, fieldName)
+		}
+	}
+
+	return resp
 }

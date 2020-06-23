@@ -2,10 +2,13 @@ package endpoints
 
 import (
 	"github.com/codemicro/nota/internal/authentication"
+	"github.com/codemicro/nota/internal/config"
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/codemicro/nota/internal/database"
@@ -23,23 +26,99 @@ func apiLogIn(c *fiber.Ctx) {
 
 	// TODO: User verification and claim update
 
+	var user models.User
+
+	username := strings.ToLower(c.FormValue("username"))
+	password := c.FormValue("password")
+
+	conn := database.Conn
+
+	if conn.Where(&models.User{Username: username}).First(&user).RecordNotFound() {
+		helpers.UnauthorisedResponse(c, "Username or password incorrect")
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(password+user.Salt)); err != nil {
+		helpers.UnauthorisedResponse(c, "Username or password incorrect")
+		return
+	}
+
 	token := jwt.New(jwt.SigningMethodRS256)
+
+	expiryTime := time.Now().Add(time.Hour * 84)
 
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
-	claims["name"] = "John Doe"
-	claims["admin"] = true
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	claims["username"] = user.Username
+	claims["id"] = user.ID
+	claims["exp"] = expiryTime.Unix()
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString(authentication.PrivKey)
+	tokenString, err := token.SignedString(authentication.PrivKey)
 	if err != nil {
 		c.Next(err)
 		return
 	}
 
-	c.JSON(fiber.Map{"token": t})
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    tokenString,
+		Expires:  expiryTime,
+		Secure:   true,
+		HTTPOnly: true, // may need to be changed
+		SameSite: "lax",
+	})
 
+	c.JSON(models.GenericResponse{
+		Status:  "ok",
+		Message: "Signed in",
+	})
+
+}
+
+func apiRegister(c *fiber.Ctx) {
+	if config.Settings.AllowRegistration {
+		username := strings.ToLower(c.FormValue("username"))
+		password := c.FormValue("password")
+
+		if username == "" || len(password) < 5 {
+			helpers.BadRequestResponse(c, "Username must be present and password must be longer than 4 characters")
+			return
+		}
+
+		conn := database.Conn
+
+		var count int
+		conn.Model(&models.User{}).Where(&models.User{Username: username}).Count(&count)
+
+		if count != 0 {
+			helpers.BadRequestResponse(c, "Username in use")
+			return
+		}
+
+		salt, err := helpers.RandomHex(20)
+		password = password + salt
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			c.Next(err)
+			return
+		}
+
+		newUser := models.User{
+			Username:     username,
+			PasswordHash: passwordHash,
+			Salt:         salt,
+		}
+
+		conn.Create(&newUser)
+
+		c.JSON(models.GenericResponse{
+			Status:  "ok",
+			Message: "User created successfully",
+		})
+	} else {
+		helpers.UnauthorisedResponse(c, "Registration disabled")
+	}
 }
 
 // Session functions
@@ -77,6 +156,7 @@ func apiGetSession(c *fiber.Ctx) {
 }
 
 func apiCreateSession(c *fiber.Ctx) {
+	// TODO: Add user who created this session
 
 	// Not using c.BodyParser because this needs everything required
 	subject := c.FormValue("subject")

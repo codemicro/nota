@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/codemicro/nota/internal/authentication"
+	"github.com/codemicro/nota/internal/config"
 	"github.com/codemicro/nota/internal/database"
 	"github.com/codemicro/nota/internal/endpoints"
 	"github.com/codemicro/nota/internal/logging"
@@ -24,10 +25,15 @@ func main() {
 	// Make directories and ignore any errors (assuming they already exist)
 	_ = os.Mkdir("img/", os.ModeDir)
 
-	// Setup logging
+	// Load settings and setup logging
+	err := config.LoadSettings()
+	if err != nil {
+		fmt.Println("Error when loading settings. Check the error logs for more detail.")
+		logging.ErrorLogger.Fatalln(err)
+	}
 	logging.InitLogging()
 
-	// Middlewares
+	// Middleware
 	app.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{ // Setup access logging
 		Next:       nil,
 		Format:     "${ip} - ${time} - ${method} \"${url}\" ${protocol} ${status} \"${ua}\"\n",
@@ -46,7 +52,7 @@ func main() {
 
 	// Setup database and register endpoints
 	database.InitDatabase()
-	err := authentication.LoadKeys()
+	err = authentication.LoadKeys()
 	if err != nil {
 		fmt.Println("Error when loading RSA keys. Check the error logs for more detail.")
 		logging.ErrorLogger.Fatalln(err)
